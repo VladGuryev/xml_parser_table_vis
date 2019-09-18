@@ -14,6 +14,8 @@ XmlParser::~XmlParser()
 
 XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath)
 {
+    keyValueStorage parameterStorage;
+
     QFile* file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -29,22 +31,22 @@ XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath)
             if (xml->name() == "root")
                 continue;
             if (xml->name() == "texteditor"){
-                addkeyValuePairToStorage();
+                addkeyValuePairToStorage(parameterStorage);
             }
             if (xml->name() == "fileformats"){
-               addkeyValuePairToStorage();
+               addkeyValuePairToStorage(parameterStorage);
             }
             if (xml->name() == "encoding"){
-                addkeyValuePairToStorage();
+                addkeyValuePairToStorage(parameterStorage);
             }
             if (xml->name() == "hasintellisense"){
-               addkeyValuePairToStorage();
+               addkeyValuePairToStorage(parameterStorage);
             }
             if (xml->name() == "hasplugins"){
-               addkeyValuePairToStorage();
+               addkeyValuePairToStorage(parameterStorage);
             }
             if (xml->name() == "cancompile"){
-               addkeyValuePairToStorage();
+               addkeyValuePairToStorage(parameterStorage);
             }
         }
     }
@@ -57,10 +59,10 @@ XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath)
     return parameterStorage;
 }
 
-void XmlParser::addkeyValuePairToStorage()
+void XmlParser::addkeyValuePairToStorage(keyValueStorage& storage)
 {
     QString key = xml->name().toString();
     xml->readNext();
     QString value = xml->text().toString();
-    parameterStorage.push_back(qMakePair(key, value));
+    storage.push_back(qMakePair(key, value));
 }

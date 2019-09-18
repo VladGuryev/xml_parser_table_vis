@@ -9,7 +9,10 @@
 class XmlParser: QObject
 {
     Q_OBJECT
-    using keyValueStorage = QVector<QPair<QString, QString>>;
+
+public:
+    using keyValue = QPair<QString, QString>;
+    using keyValueStorage = QVector<keyValue>;
 
 public:
     explicit XmlParser();
@@ -17,11 +20,10 @@ public:
     keyValueStorage parseXmlFile(QString filePath);
 
 private:
-    void addkeyValuePairToStorage();
+    void addkeyValuePairToStorage(keyValueStorage& storage);
 
 private:
     QXmlStreamReader* xml;
-    keyValueStorage parameterStorage;
 };
 
 #endif // XMLPARSER_H

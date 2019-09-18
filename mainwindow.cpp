@@ -9,6 +9,7 @@
 #include <QFileDialog>
 #include <QtConcurrent/QtConcurrent>
 
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -46,9 +47,30 @@ void MainWindow::importBtnHandler()
 void MainWindow::operate()
 {
     int numberOfParsedFiles = 0;
+    QVector<QString> header;
+    CustomModel::Row currentRow;
+    QVector<CustomModel::Row> rows;
+
+    std::function<void(XmlParser::keyValue)> headerComposer =
+            [&header](const XmlParser::keyValue& kv){
+                        header.push_back(kv.first);};
+
+    std::function<void(XmlParser::keyValue)> rowComposer =
+            [&currentRow](const XmlParser::keyValue& kv){
+                        currentRow.push_back(kv.second);};
+
     foreach(QString filename,  files){
         qDebug() << "****" << filename << endl;
-        parser->parseXmlFile(filename);
-        emit processedFileNum(++numberOfParsedFiles);
+        auto parsedData = parser->parseXmlFile(filename);
+        numberOfParsedFiles++;
+
+        if(numberOfParsedFiles == 1){
+            std::for_each(parsedData.begin(), parsedData.end(), headerComposer);
+        }
+        std::for_each(parsedData.begin(), parsedData.end(), rowComposer);
+
+        rows.push_back(currentRow);
+        emit processedFileNum(numberOfParsedFiles);
     }
+    qDebug() << "HEADER END<><><><><><><>" << header;
 }
