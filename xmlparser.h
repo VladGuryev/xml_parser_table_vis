@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QXmlStreamReader>
 #include <QFile>
-#include <QMap>
+#include <functional>
 
-class XmlParser: QObject
+class XmlParser: public QObject
 {
     Q_OBJECT
 
@@ -15,9 +15,12 @@ public:
     using keyValueStorage = QVector<keyValue>;
 
 public:
-    explicit XmlParser();
+    explicit XmlParser(QObject *parent = nullptr);
     virtual ~XmlParser();
-    keyValueStorage parseXmlFile(QString filePath);
+    keyValueStorage parseXmlFile(QString filePath, bool& isParsedProperly);
+
+signals:
+    void errorLogSender(QString);
 
 private:
     void addkeyValuePairToStorage(keyValueStorage& storage);

@@ -1,8 +1,8 @@
-#include "xmlparser.h"
-#include <QtDebug>
 #include <utility>
+#include <QFileInfo>
+#include "xmlparser.h"
 
-XmlParser::XmlParser()
+XmlParser::XmlParser(QObject *parent) : QObject (parent)
 {
     xml = new QXmlStreamReader();
 }
@@ -12,18 +12,19 @@ XmlParser::~XmlParser()
     delete xml;
 }
 
-XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath)
+XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath,
+                                                   bool& isParsedProperly)
 {
     keyValueStorage parameterStorage;
 
     QFile* file = new QFile(filePath);
     if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
     {
-       qDebug() << "unable to open xml file";
+       emit errorLogSender("unable to open xml file");
     }
     xml->setDevice(file);
 
-    while (!xml->atEnd()){
+    while (!xml->atEnd() && !xml->hasError()){
         QXmlStreamReader::TokenType token = xml->readNext();
         if (token == QXmlStreamReader::StartDocument)
             continue;
@@ -51,11 +52,18 @@ XmlParser::keyValueStorage XmlParser::parseXmlFile(QString filePath)
         }
     }
     if(xml->hasError()){
-        qDebug() << QObject::tr("%1\nLine %2, column %3")
-                    .arg(xml->errorString())
-                    .arg(xml->lineNumber())
-                    .arg(xml->columnNumber());
+        isParsedProperly = false;
+
+        QFileInfo fileInfo(file->fileName());
+        QString error = fileInfo.fileName() + "\n" + QObject::tr("%1 Line %2, column %3")
+                            .arg(xml->errorString())
+                            .arg(xml->lineNumber())
+                            .arg(xml->columnNumber());
+        emit errorLogSender(error);
+    } else {
+        isParsedProperly = true;
     }
+    delete file;
     return parameterStorage;
 }
 
