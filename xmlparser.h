@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #include <QFile>
 #include <functional>
 
@@ -17,7 +18,8 @@ public:
 public:
     explicit XmlParser(QObject *parent = nullptr);
     virtual ~XmlParser();
-    keyValueStorage parseXmlFile(QString filePath, bool& isParsedProperly);
+    keyValueStorage importXmlFile(QString filePath, bool& isParsedProperly);
+    void exportXmlToFile(QList<QString> tags, QString filePath);
 
 signals:
     void errorLogSender(QString);
@@ -26,7 +28,8 @@ private:
     void addkeyValuePairToStorage(keyValueStorage& storage);
 
 private:
-    QXmlStreamReader* xml;
+    QXmlStreamReader* xmlReader;
+    QXmlStreamWriter* xmlWriter;
 };
 
 #endif // XMLPARSER_H
