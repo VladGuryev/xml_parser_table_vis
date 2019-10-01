@@ -17,7 +17,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void processImport();
-    void processExport(QFile* const file);
+    void processExport(QString fileName);
 
 signals:
     void processedFileNum(int);

@@ -76,8 +76,9 @@ void XmlParser::exportXmlToFile(const CustomModel::Row& header,
     xmlWriter->setDevice(file);
     xmlWriter->setAutoFormatting(true);  // Устанавливаем автоформатирование текста
     xmlWriter->writeStartDocument();     // Запускаем запись в документ
-    xmlWriter->writeStartElement(header.at(0));   // Записываем первый элемент с его именем
-    qDebug() << header;
+    xmlWriter->writeStartElement("first_editor");   // Записываем первый элемент с его именем
+    xmlWriter->writeAttribute("boolean", "true");
+    qDebug() << "header:" <<header;
     xmlWriter->writeEndElement();
     /* Завершаем запись в документ
      * */

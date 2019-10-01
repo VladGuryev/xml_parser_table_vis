@@ -60,13 +60,8 @@ void MainWindow::exportBtnHandler()
     if (fileName.isEmpty())
         return;
     else {
-        QFile* file = new QFile(fileName, this); //in this case file will be automatically closed when destructed
-        if (!file->open(QIODevice::WriteOnly)) {
-            QMessageBox::information(this, tr("Unable to create xml file for export"),
-                file->errorString());
-            return;
-        }
-        QtConcurrent::run(this, &MainWindow::processExport, file);
+
+        QtConcurrent::run(this, &MainWindow::processExport, fileName);
     }
 }
 
@@ -122,9 +117,17 @@ void MainWindow::processImport()
     }
 }
 
-void MainWindow::processExport(QFile* const file)
+void MainWindow::processExport(QString fileName)
 {
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::information(this, tr("Unable to create xml file for export"),
+            file.errorString());
+        return;
+    }
     parser->exportXmlToFile(customModel->getHeader(),
                             customModel->getRows(),
-                            file);
+                            &file);
+    qDebug() << "processExport";
+    file.close();
 }
