@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QUrl>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -14,25 +15,28 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setFixedSize(QSize(880, 515));
 
-    customModel = new CustomModel();
+    customModel = new CustomModel;
     ui->tableView->setModel(customModel);
-    setWindowTitle("XML Parser developed by Guryev Vlad");
+    setWindowTitle("XML Parser");
 
-    parser = new XmlParser;
+    parser = new XmlParser(this);
 
-    connect(ui->importXmlBtn, SIGNAL(clicked()), this, SLOT(importBtnHandler()));
+    connect(ui->importXmlBtn, &QPushButton::clicked,
+            this, &MainWindow::importBtnHandler);
+    connect(ui->exportXmlBtn, &QPushButton::clicked,
+            this, &MainWindow::exportBtnHandler);
+    connect(parser, &XmlParser::errorLogSender,
+            this, &MainWindow::errorLogHandler, Qt::QueuedConnection);
+
     connect(this, &MainWindow::processedFileNum, this, [this](int num){
         ui->progressBar->setValue(num);}, Qt::QueuedConnection);
     connect(this, SIGNAL(okFileNumber(int)), this, SLOT(okFileLabelUpdater(int)),
             Qt::QueuedConnection);
-    connect(parser, SIGNAL(errorLogSender(QString)),
-            this, SLOT(errorLogHandler(QString)), Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete parser;
 }
 
 void MainWindow::importBtnHandler()
@@ -44,10 +48,39 @@ void MainWindow::importBtnHandler()
 
     ui->progressBar->setRange(0, files.count());
     ui->okFilesLabel->clear();
-    QtConcurrent::run(this, &MainWindow::operate);
+    QtConcurrent::run(this, &MainWindow::processImport);
 }
 
-void MainWindow::operate()
+void MainWindow::exportBtnHandler()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+           tr("Save table data to XML file"), "",
+           tr("XML file (*.XML);;All Files (*)"));
+
+    if (fileName.isEmpty())
+        return;
+    else {
+        QFile* file = new QFile(fileName, this); //in this case file will be automatically closed when destructed
+        if (!file->open(QIODevice::WriteOnly)) {
+            QMessageBox::information(this, tr("Unable to create xml file for export"),
+                file->errorString());
+            return;
+        }
+        QtConcurrent::run(this, &MainWindow::processExport, file);
+    }
+}
+
+void MainWindow::okFileLabelUpdater(int num)
+{
+    ui->okFilesLabel->setText(QString::number(num));
+}
+
+void MainWindow::errorLogHandler(QString e)
+{
+    ui->errorField->appendPlainText(e + "\n");
+}
+
+void MainWindow::processImport()
 {
     int numberOfParsedFiles = 0;
     int errorParsedFileNum = 0;
@@ -65,7 +98,7 @@ void MainWindow::operate()
 
     for(const auto& filename: files){
         bool isParsedOk = false;
-        auto parsedData = parser->parseXmlFile(filename, isParsedOk);
+        auto parsedData = parser->importXmlFile(filename, isParsedOk);
         emit processedFileNum(++numberOfParsedFiles);
 
         if(!isParsedOk){
@@ -89,12 +122,9 @@ void MainWindow::operate()
     }
 }
 
-void MainWindow::okFileLabelUpdater(int num)
+void MainWindow::processExport(QFile* const file)
 {
-    ui->okFilesLabel->setText(QString::number(num));
-}
-
-void MainWindow::errorLogHandler(QString e)
-{
-    ui->errorField->appendPlainText(e + "\n");
+    parser->exportXmlToFile(customModel->getHeader(),
+                            customModel->getRows(),
+                            file);
 }

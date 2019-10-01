@@ -25,13 +25,13 @@ CONFIG += c++14
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    model.cpp \
-    xmlparser.cpp
+        model.cpp \
+        xmlparser.cpp
 
 HEADERS += \
         mainwindow.h \
-    model.h \
-    xmlparser.h
+        model.h \
+        xmlparser.h
 
 FORMS += \
         mainwindow.ui

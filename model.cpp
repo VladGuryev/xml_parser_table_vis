@@ -1,23 +1,21 @@
 #include "model.h"
 
-CustomModel::CustomModel()
+CustomModel::CustomModel(QObject *parent) : QAbstractTableModel(parent)
 {
     qRegisterMetaType<Qt::Orientation>("Qt::Orientation");
 }
 
-int CustomModel::rowCount(const QModelIndex &parent) const
+int CustomModel::rowCount(const QModelIndex&) const
 {
-   Q_UNUSED(parent);
    return rows.count();
 }
 
-int CustomModel::columnCount(const QModelIndex &parent) const
+int CustomModel::columnCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return header.count();
 }
 
-QVariant CustomModel::data(const QModelIndex &index, int role) const
+QVariant CustomModel::data(const QModelIndex& index, int role) const
 {
     if(!index.isValid())
         return QVariant();
@@ -53,4 +51,14 @@ void CustomModel::setHeader(Row header)
 void CustomModel::setRows(QVector<Row> rows)
 {
     this->rows = rows;
+}
+
+const QVector<CustomModel::Row>& CustomModel::getRows() const
+{
+    return rows;
+}
+
+const CustomModel::Row& CustomModel::getHeader() const
+{
+    return header;
 }

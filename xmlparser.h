@@ -6,6 +6,8 @@
 #include <QXmlStreamWriter>
 #include <QFile>
 #include <functional>
+#include <memory>
+#include <model.h>
 
 class XmlParser: public QObject
 {
@@ -19,7 +21,9 @@ public:
     explicit XmlParser(QObject *parent = nullptr);
     virtual ~XmlParser();
     keyValueStorage importXmlFile(QString filePath, bool& isParsedProperly);
-    void exportXmlToFile(QList<QString> tags, QString filePath);
+    void exportXmlToFile(const CustomModel::Row& header,
+                         const QVector<CustomModel::Row>& rows,
+                         QFile* const file);
 
 signals:
     void errorLogSender(QString);
@@ -28,8 +32,8 @@ private:
     void addkeyValuePairToStorage(keyValueStorage& storage);
 
 private:
-    QXmlStreamReader* xmlReader;
-    QXmlStreamWriter* xmlWriter;
+    std::unique_ptr<QXmlStreamReader> xmlReader;
+    std::unique_ptr<QXmlStreamWriter> xmlWriter;
 };
 
 #endif // XMLPARSER_H

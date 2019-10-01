@@ -16,7 +16,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void operate();
+    void processImport();
+    void processExport(QFile* const file);
 
 signals:
     void processedFileNum(int);
@@ -25,6 +26,7 @@ signals:
 
 public slots:
     void importBtnHandler();
+    void exportBtnHandler();
     void okFileLabelUpdater(int);
     void errorLogHandler(QString);
 
