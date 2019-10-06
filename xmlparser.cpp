@@ -68,23 +68,6 @@ XmlParser::keyValueStorage XmlParser::importXmlFile(QString filePath,
     return parameterStorage;
 }
 
-void XmlParser::exportXmlToFile(const CustomModel::Row& header,
-                                const QVector<CustomModel::Row>& rows,
-                                QFile* const file)
-{
-    /* Создаем объект, с помощью которого осуществляется запись в файл */
-    xmlWriter->setDevice(file);
-    xmlWriter->setAutoFormatting(true);  // Устанавливаем автоформатирование текста
-    xmlWriter->writeStartDocument();     // Запускаем запись в документ
-    xmlWriter->writeStartElement("first_editor");   // Записываем первый элемент с его именем
-    xmlWriter->writeAttribute("boolean", "true");
-    qDebug() << "header:" <<header;
-    xmlWriter->writeEndElement();
-    /* Завершаем запись в документ
-     * */
-    xmlWriter->writeEndDocument();
-}
-
 void XmlParser::addkeyValuePairToStorage(keyValueStorage& storage)
 {
     QString key = xmlReader->name().toString();
@@ -92,3 +75,40 @@ void XmlParser::addkeyValuePairToStorage(keyValueStorage& storage)
     QString value = xmlReader->text().toString();
     storage.push_back(qMakePair(key, value));
 }
+
+void XmlParser::exportXmlToFile(const CustomModel::Row& tagNames,
+                                const QVector<CustomModel::Row>& tagDataRows,
+                                QFile* const file)
+{
+    /* Создаем объект, с помощью которого осуществляется запись в файл */
+    xmlWriter->setDevice(file);
+    xmlWriter->setAutoFormatting(true);     // Устанавливаем автоформатирование текста
+    xmlWriter->writeStartDocument();        // Запускаем запись в документ
+    xmlWriter->writeStartElement("TextEditorList");   // Записываем root элемент с его именем
+
+    const int fileNumber(tagDataRows.count());
+    for(int i = 0; i < fileNumber; i++){
+        xmlWriter->writeStartElement(tagNames.at(0));
+        xmlWriter->writeAttribute("name", tagDataRows.at(i).at(0));
+        for(int j = 1; j < tagNames.count(); j++){
+            this->writeXmlTag(tagNames.at(j), tagDataRows.at(i).at(j));
+        }
+        xmlWriter->writeEndElement();
+    }
+    /* Закрываем тег "TextEditorList" */
+    xmlWriter->writeEndElement();
+    /* Завершаем запись в документ */
+    xmlWriter->writeEndDocument();
+}
+
+void XmlParser::writeXmlTag(QString tagName, QString tagData)
+{
+    xmlWriter->writeStartElement(tagName);  // Открываем тег
+    bool hasBooleanAttribute((tagData == "true") || (tagData == "false"));
+    if(hasBooleanAttribute){
+        xmlWriter->writeAttribute("boolean", tagData);
+    }
+    xmlWriter->writeCharacters(tagData);
+    xmlWriter->writeEndElement();        // Закрываем тег
+}
+

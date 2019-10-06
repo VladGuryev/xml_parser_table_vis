@@ -42,13 +42,13 @@ MainWindow::~MainWindow()
 void MainWindow::importBtnHandler()
 {
     QFileDialog dialog;
-    files = dialog.getOpenFileNames(this, QString(),
+    QStringList files = dialog.getOpenFileNames(this, QString(),
                             QDir::currentPath(),
                             "XML files (*.xml, *.XML)");
 
     ui->progressBar->setRange(0, files.count());
     ui->okFilesLabel->clear();
-    QtConcurrent::run(this, &MainWindow::processImport);
+    QtConcurrent::run(this, &MainWindow::processImport, files);
 }
 
 void MainWindow::exportBtnHandler()
@@ -60,7 +60,6 @@ void MainWindow::exportBtnHandler()
     if (fileName.isEmpty())
         return;
     else {
-
         QtConcurrent::run(this, &MainWindow::processExport, fileName);
     }
 }
@@ -75,7 +74,7 @@ void MainWindow::errorLogHandler(QString e)
     ui->errorField->appendPlainText(e + "\n");
 }
 
-void MainWindow::processImport()
+void MainWindow::processImport(QStringList files)
 {
     int numberOfParsedFiles = 0;
     int errorParsedFileNum = 0;
@@ -129,5 +128,4 @@ void MainWindow::processExport(QString fileName)
                             customModel->getRows(),
                             &file);
     qDebug() << "processExport";
-    file.close();
 }

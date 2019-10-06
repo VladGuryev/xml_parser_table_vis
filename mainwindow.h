@@ -16,7 +16,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void processImport();
+    void processImport(QStringList files);
     void processExport(QString fileName);
 
 signals:
@@ -33,7 +33,7 @@ public slots:
 private:
     Ui::MainWindow *ui;
     XmlParser* parser;
-    QStringList files;
+  //  QStringList files;
     CustomModel* customModel;
 };
 

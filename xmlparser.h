@@ -21,7 +21,7 @@ public:
     explicit XmlParser(QObject *parent = nullptr);
     virtual ~XmlParser();
     keyValueStorage importXmlFile(QString filePath, bool& isParsedProperly);
-    void exportXmlToFile(const CustomModel::Row& header,
+    void exportXmlToFile(const CustomModel::Row& tagNames,
                          const QVector<CustomModel::Row>& rows,
                          QFile* const file);
 
@@ -30,6 +30,7 @@ signals:
 
 private:
     void addkeyValuePairToStorage(keyValueStorage& storage);
+    void writeXmlTag(QString tagName, QString tagData);
 
 private:
     std::unique_ptr<QXmlStreamReader> xmlReader;
